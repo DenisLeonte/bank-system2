@@ -1,0 +1,4 @@
+﻿  main.cpp
+C:\Users\Denis\Desktop\info\bank-system2\main.cpp(44,1): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\Denis\Desktop\info\bank-system2\main.cpp(55,1): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  bank-system2.vcxproj -> C:\Users\Denis\Desktop\info\bank-system2\Debug\bank-system2.exe
