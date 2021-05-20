@@ -556,7 +556,7 @@ void changePass(account x)
     {
         //Parola este corecta, se poate schimba parola
         cout << "Enter the new password : ";
-        cin >> password_c;
+        cin >> password_c;  
         //Cryptarea noii parole
         sha.update(password_c);
         uint8_t* digest = sha.digest();
@@ -731,6 +731,7 @@ void login_screen()
 //main
 int main()
 {
+    
     login_screen();
 
     return 0;
