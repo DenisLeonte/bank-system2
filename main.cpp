@@ -157,6 +157,15 @@ void writeToFile(account x, bool add)
     if (add)
         all.push_back(x);
     in.close();
+    //Sortarea vectorului
+    for (vector<account>::size_type i = 0; i != all.size() - 1; i++)
+    {
+        for (vector<account>::size_type j = i + 1; j != all.size(); j++)
+        {
+            if (all[i].code > all[j].code)
+                swap(all[i], all[j]);
+        }
+    }
     //Scrie in fisier
     ofstream out("database.txt");
     for (auto& it : all)
@@ -400,13 +409,12 @@ void create_user()
     m_code = 0;
     ifstream in("accounts.txt");
     cred aux;
-    account aux1;
+    account aux1,aux2;
     string password;
-    vector<cred> a;
-    //Adaugam in vector toate parolele existente
+    bool ok = true;
+    //Verificam codul maxim existent
     while (in >> aux.code >> aux.password)
     {
-        a.push_back(aux);
         if (aux.code > m_code)
             m_code = aux.code;
     }
@@ -415,47 +423,49 @@ void create_user()
     cout << "REGISTER SCREEN\n";
     cout << "NAME : "; cin >> aux1.name;
     cout << "SURNAME :"; cin >> aux1.surname;
-    cout << "PASSWORD : "; cin >> aux.password;
-    cout << "REPEAT THE PASSWORD : "; cin >> password;
-    aux1.balance = 0;
-    if (password == aux.password)
+    ifstream in("database.txt");
+    while (in >> aux2.code >> aux2.name >> aux2.surname >> aux2.balance)
     {
-        //Creste valoarea codului cel mai mare cu 1
-        m_code++;
-        aux1.code = m_code;
-        //Cryptarea parolei in SHA256
-        SHA256 sha;
-        sha.update(aux.password);
-        uint8_t* digest = sha.digest();
-        string aux2 = SHA256::toString(digest);
-        delete[] digest;
-        aux.password = aux2;
-        aux.code = m_code;
-        //Adaugam contul aux in vector si il sortam
-        a.push_back(aux);
-        for (vector<cred>::size_type i = 0; i != a.size() - 1; i++)
+        if (aux2.name == aux1.name && aux2.surname == aux1.surname)
         {
-            for (vector<cred>::size_type j = i + 1; j != a.size(); j++)
-            {
-                if (a[i].code > a[j].code)
-                {
-                    swap(a[i], a[j]);
-                }
-            }
+            ok = false;
+            break;
         }
-        //Scriem in fisier codul si parola
-        ofstream out("accounts.txt");
-        for (vector<cred>::size_type i = 0; i != a.size(); i++)
-            out << a[i].code << " " << a[i].password << endl;
-        out.close();
-        //Scriem in fisier datele contului, cu parametrul true din cauza ca adaugam un cont
-        writeToFile(aux1, true);
-        cout << "USER REGISTERED SUCCESFULLY. YOU CAN NOW LOGIN\n";
-        pause();
     }
-    //Parola este gresita
-    else cout << "PASSWORDS MUST BE THE SAME\n";
-
+    if (ok)
+    {
+        cout << "PASSWORD : "; cin >> aux.password;
+        cout << "REPEAT THE PASSWORD : "; cin >> password;
+        aux1.balance = 0;
+        if (password == aux.password)
+        {
+            //Creste valoarea codului cel mai mare cu 1
+            m_code++;
+            aux1.code = m_code;
+            //Cryptarea parolei in SHA256
+            SHA256 sha;
+            sha.update(aux.password);
+            uint8_t* digest = sha.digest();
+            string aux2 = SHA256::toString(digest);
+            delete[] digest;
+            aux.password = aux2;
+            aux.code = m_code;
+            //Scriem in fisier codul si parola
+            ofstream out("accounts.txt", ios::app);
+            out << aux.code << " " << aux.password << endl;
+            out.close();
+            //Scriem in fisier datele contului, cu parametrul true din cauza ca adaugam un cont
+            writeToFile(aux1, true);
+            cout << "USER REGISTERED SUCCESFULLY. YOU CAN NOW LOGIN\n";
+        }
+        //Parola este gresita
+        else cout << "PASSWORDS MUST BE THE SAME\n";
+    }
+    else
+    {
+        cout << "USER ALREADY REGISTERED\n";
+    }
+    pause();
 }
 
 //Functie care va tine minte toate tranzactiile
@@ -703,7 +713,7 @@ void login_screen()
         int op = 0;
         cout << "1. Login\n";
         cout << "2. Register\n";
-        cout << "3. Exit\n";
+        cout << "0. Exit\n";
         cin >> op;
         if (op == 1)
         {
@@ -713,7 +723,7 @@ void login_screen()
         {
             create_user();
         }
-        else if (op == 3)
+        else if (op == 0)
         {
             cout << "See you again\n";
             break;
@@ -733,7 +743,6 @@ int main()
 {
     
     login_screen();
-
     return 0;
 }
 
